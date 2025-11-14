@@ -98,8 +98,31 @@ function convertScriptAST(
     // Track if we found any unmappable Bruno APIs
     let hasUnmappableCode = false;
 
+    // Track responseBody rename warning
+    let renamedResponseBody = false;
+
     // Traverse and transform the AST
     traverse(ast, {
+      // Rename 'responseBody' variables in test scripts to avoid Postman sandbox conflict
+      VariableDeclarator(path: NodePath<t.VariableDeclarator>) {
+        if (
+          scriptType === 'test' &&
+          t.isIdentifier(path.node.id) &&
+          path.node.id.name === 'responseBody'
+        ) {
+          // Rename to avoid conflict with Postman's built-in responseBody
+          const newName = 'parsedResponseBody';
+
+          // Get the scope to rename all references
+          const binding = path.scope.getBinding('responseBody');
+          if (binding) {
+            binding.scope.rename('responseBody', newName);
+            renamedResponseBody = true;
+          }
+        }
+      },
+
+
       // Transform call expressions for method calls like bru.setVar(), test(), expect()
       CallExpression(path: NodePath<t.CallExpression>) {
         const node = path.node;
@@ -195,6 +218,35 @@ function convertScriptAST(
           }
         }
 
+        // Handle res.headers["key"] → pm.response.headers.get("key")
+        if (
+          scriptType === 'test' &&
+          node.computed && // Bracket notation: res.headers["key"]
+          t.isMemberExpression(node.object) &&
+          t.isIdentifier(node.object.object) &&
+          node.object.object.name === 'res' &&
+          t.isIdentifier(node.object.property) &&
+          node.object.property.name === 'headers' &&
+          !t.isPrivateName(node.property) // Ensure it's not a private name
+        ) {
+          // Transform res.headers["key"] to pm.response.headers.get("key")
+          const pmResponseHeaders = t.memberExpression(
+            t.memberExpression(
+              t.identifier('pm'),
+              t.identifier('response')
+            ),
+            t.identifier('headers')
+          );
+
+          const getMethod = t.memberExpression(
+            pmResponseHeaders,
+            t.identifier('get')
+          );
+
+          // Replace with pm.response.headers.get(headerName)
+          path.replaceWith(t.callExpression(getMethod, [node.property as t.Expression]));
+        }
+
         // Handle res.getBody() method call
         if (
           scriptType === 'test' &&
@@ -227,6 +279,11 @@ function convertScriptAST(
     if (hasUnmappableCode) {
       finalScript = '// WARNING: partial conversion - review manually\n' + finalScript;
       warnings.push('Script contains partial conversion - manual review required');
+    }
+
+    // Add info about responseBody rename
+    if (renamedResponseBody) {
+      warnings.push('Variable "responseBody" renamed to "parsedResponseBody" to avoid Postman sandbox conflict');
     }
 
     return {

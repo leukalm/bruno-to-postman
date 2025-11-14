@@ -282,6 +282,27 @@ test("Status is 200", function() {
       expect(result.script).toContain('const time = pm.response.responseTime');
     });
 
+    it('should convert res.headers["key"] to pm.response.headers.get("key")', () => {
+      const brunoScript = 'const contentType = res.headers["content-type"];';
+      const result = convertTestScriptAST(brunoScript);
+
+      expect(result.success).toBe(true);
+      expect(result.script).toContain('pm.response.headers.get("content-type")');
+    });
+
+    it('should handle header access in expect assertions', () => {
+      const brunoScript = `
+test("Check content type", function() {
+  expect(res.headers["content-type"]).to.contain("application/json");
+});
+`;
+      const result = convertTestScriptAST(brunoScript);
+
+      expect(result.success).toBe(true);
+      expect(result.script).toContain('pm.response.headers.get("content-type")');
+      expect(result.script).toContain('pm.expect');
+    });
+
     it('should handle complex test with loops and conditions', () => {
       const brunoScript = `
 test("Validate array items", function() {
@@ -436,6 +457,42 @@ test("Multi-line test", function() {
       // Check that the structure is maintained with separate statements
       const lines = result.script.split('\n');
       expect(lines.length).toBeGreaterThan(5); // Multiple lines maintained
+    });
+
+    it('should rename responseBody variable to avoid Postman sandbox conflict', () => {
+      const brunoScript = `
+const responseBody = res.getBody();
+if (responseBody && responseBody.id) {
+  bru.setVar("userId", responseBody.id);
+}
+`;
+      const result = convertTestScriptAST(brunoScript);
+
+      expect(result.success).toBe(true);
+      expect(result.script).toContain('parsedResponseBody');
+      expect(result.script).not.toContain('const responseBody');
+      expect(result.warnings.some(w => w.includes('responseBody'))).toBe(true);
+    });
+
+    it('should rename responseBody and all its references', () => {
+      const brunoScript = `
+test("Save response", function() {
+  const responseBody = res.body;
+  expect(responseBody.id).to.exist;
+  expect(responseBody.name).to.be.a("string");
+  bru.setVar("data", JSON.stringify(responseBody));
+});
+`;
+      const result = convertTestScriptAST(brunoScript);
+
+      expect(result.success).toBe(true);
+      // All occurrences should be renamed
+      expect(result.script).toContain('parsedResponseBody');
+      expect(result.script).toContain('parsedResponseBody.id');
+      expect(result.script).toContain('parsedResponseBody.name');
+      expect(result.script).toContain('JSON.stringify(parsedResponseBody)');
+      // No original responseBody should remain
+      expect(result.script).not.toContain('const responseBody');
     });
   });
 
