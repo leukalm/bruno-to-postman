@@ -116,8 +116,17 @@ export const BrunoEnvironmentSchema = z.object({
 });
 export type BrunoEnvironment = z.infer<typeof BrunoEnvironmentSchema>;
 
-// Bruno Collection Item
-export const BrunoCollectionItemSchema: z.ZodType<BrunoCollectionItem> = z.lazy(() =>
+// Bruno Collection Item (recursive type)
+export type BrunoCollectionItem = {
+  type: 'request' | 'folder';
+  name: string;
+  path: string;
+  request?: BrunoRequest;
+  items?: BrunoCollectionItem[];
+};
+
+// Use any type for the schema to avoid complex recursive type issues
+export const BrunoCollectionItemSchema: z.ZodSchema<any> = z.lazy(() =>
   z.object({
     type: z.enum(['request', 'folder']),
     name: z.string(),
@@ -126,13 +135,6 @@ export const BrunoCollectionItemSchema: z.ZodType<BrunoCollectionItem> = z.lazy(
     items: z.array(BrunoCollectionItemSchema).optional(),
   })
 );
-export type BrunoCollectionItem = {
-  type: 'request' | 'folder';
-  name: string;
-  path: string;
-  request?: BrunoRequest;
-  items?: BrunoCollectionItem[];
-};
 
 // Bruno Collection
 export const BrunoCollectionSchema = z.object({

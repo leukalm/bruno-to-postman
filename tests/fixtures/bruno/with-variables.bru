@@ -1,0 +1,25 @@
+meta {
+  name: Get User Profile
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{baseUrl}}/api/users/{{userId}}
+  body: none
+  auth: bearer
+}
+
+headers {
+  Authorization: Bearer {{token}}
+  Accept: application/json
+}
+
+params:query {
+  include: profile
+  fields: name,email,avatar
+}
+
+auth:bearer {
+  token: {{token}}
+}
