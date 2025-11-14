@@ -5,7 +5,9 @@
       "SlashCommand(/speckit.plan)",
       "Bash(bash:*)",
       "Bash(.specify/scripts/bash/check-prerequisites.sh:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)"
     ],
     "deny": [],
     "ask": []
