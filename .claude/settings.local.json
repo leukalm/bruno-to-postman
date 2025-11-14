@@ -13,7 +13,9 @@
       "Bash(npm run build:*)",
       "Bash(chmod:*)",
       "Bash(node bin/bruno-to-postman.js:*)",
-      "Bash(npm run test:coverage:*)"
+      "Bash(npm run test:coverage:*)",
+      "Bash(git push:*)",
+      "Bash(cat:*)"
     ],
     "deny": [],
     "ask": []

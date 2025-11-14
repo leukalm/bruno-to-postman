@@ -1,0 +1,73 @@
+meta {
+  name: Request with Scripts
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/users/{{userId}}
+}
+
+headers {
+  Authorization: Bearer {{token}}
+  Accept: application/json
+}
+
+params:query {
+  include: profile,settings
+  ~exclude: deleted
+}
+
+script:pre-request {
+  // Generate timestamp for request
+  bru.setVar("requestTimestamp", Date.now());
+
+  // Set custom header value
+  const userAgent = "BrunoClient/1.0";
+  bru.setVar("userAgent", userAgent);
+
+  // Log request details
+  console.log("Sending request to:", bru.getEnvVar("baseUrl"));
+}
+
+script:test {
+  // Test response status
+  test("Status code is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+
+  // Test response body structure
+  test("Response has user data", function() {
+    expect(res.body).to.have.property("id");
+    expect(res.body).to.have.property("name");
+    expect(res.body).to.have.property("email");
+  });
+
+  // Test headers
+  test("Response is JSON", function() {
+    expect(res.headers["content-type"]).to.contain("application/json");
+  });
+
+  // Save data for next request
+  if (res.body && res.body.id) {
+    bru.setVar("lastUserId", res.body.id);
+  }
+
+  // Performance check
+  const responseTime = res.responseTime;
+  test("Response time is acceptable", function() {
+    expect(responseTime).to.be.below(1000);
+  });
+}
+
+docs {
+  This request fetches user details with authentication.
+
+  Variables used:
+  - baseUrl: API base URL
+  - userId: The user ID to fetch
+  - token: Bearer authentication token
+
+  The pre-request script generates a timestamp and sets up user agent.
+  The test script validates the response structure and saves the user ID.
+}

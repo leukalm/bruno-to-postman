@@ -1,0 +1,94 @@
+{
+  "info": {
+    "name": "Test Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Request with Scripts",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}",
+            "type": "text"
+          },
+          {
+            "key": "Accept",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/users/{{userId}}?include=profile,settings",
+          "protocol": "{{baseUrl}}",
+          "host": [
+            "/api/users/{{userId}}"
+          ],
+          "query": [
+            {
+              "key": "include",
+              "value": "profile,settings"
+            }
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Generate timestamp for request",
+              "pm.environment.set(\"requestTimestamp\", Date.now());",
+              "",
+              "// Set custom header value",
+              "const userAgent = \"BrunoClient/1.0\";",
+              "pm.environment.set(\"userAgent\", userAgent);",
+              "",
+              "// Log request details",
+              "console.log(\"Sending request to:\", pm.environment.get(\"baseUrl\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "// Test response status",
+              "test(\"Status code is 200\", function() {",
+              "  expect(pm.response.code).to.equal(200);",
+              "});",
+              "",
+              "// Test response body structure",
+              "test(\"Response has user data\", function() {",
+              "  expect(pm.response.json()).to.have.property(\"id\");",
+              "  expect(pm.response.json()).to.have.property(\"name\");",
+              "  expect(pm.response.json()).to.have.property(\"email\");",
+              "});",
+              "",
+              "// Test headers",
+              "test(\"Response is JSON\", function() {",
+              "  expect(pm.response.headers[\"content-type\"]).to.contain(\"application/json\");",
+              "});",
+              "",
+              "// Save data for next request",
+              "if (pm.response.json() && pm.response.json().id) {",
+              "  pm.environment.set(\"lastUserId\", pm.response.json().id);",
+              "}",
+              "",
+              "// WARNING: partial conversion - review manually",
+              "// Performance check",
+              "const responseTime = res.responseTime;",
+              "test(\"Response time is acceptable\", function() {",
+              "  expect(responseTime).to.be.below(1000);",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -13,6 +13,7 @@
  * - res.status → pm.response.code
  * - res.body → pm.response.json()
  * - res.headers → pm.response.headers
+ * - res.responseTime → pm.response.responseTime
  */
 
 interface ScriptConversionResult {
@@ -112,6 +113,12 @@ export function convertTestScript(brunoScript: string): ScriptConversionResult {
     // res.headers → pm.response.headers
     if (convertedLine.includes('res.headers')) {
       convertedLine = convertedLine.replace(/res\.headers/g, 'pm.response.headers');
+      lineConverted = true;
+    }
+
+    // res.responseTime → pm.response.responseTime
+    if (convertedLine.includes('res.responseTime')) {
+      convertedLine = convertedLine.replace(/res\.responseTime/g, 'pm.response.responseTime');
       lineConverted = true;
     }
 
