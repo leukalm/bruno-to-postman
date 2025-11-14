@@ -159,7 +159,17 @@ export const PostmanRequestSchema = z.object({
 export type PostmanRequest = z.infer<typeof PostmanRequestSchema>;
 
 // Postman Item (recursive)
-export const PostmanItemSchema: z.ZodType<PostmanItem> = z.lazy(() =>
+export type PostmanItem = {
+  name: string;
+  description?: string;
+  item?: PostmanItem[];
+  request?: PostmanRequest;
+  event?: PostmanEvent[];
+  protocolProfileBehavior?: Record<string, unknown>;
+};
+
+// Use any type for the schema to avoid complex recursive type issues
+export const PostmanItemSchema: z.ZodSchema<any> = z.lazy(() =>
   z.object({
     name: z.string(),
     description: z.string().optional(),
@@ -169,14 +179,6 @@ export const PostmanItemSchema: z.ZodType<PostmanItem> = z.lazy(() =>
     protocolProfileBehavior: z.record(z.unknown()).optional(),
   })
 );
-export type PostmanItem = {
-  name: string;
-  description?: string;
-  item?: PostmanItem[];
-  request?: PostmanRequest;
-  event?: PostmanEvent[];
-  protocolProfileBehavior?: Record<string, unknown>;
-};
 
 // Postman Variable
 export const PostmanVariableSchema = z.object({

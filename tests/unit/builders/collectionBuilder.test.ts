@@ -69,7 +69,7 @@ script:pre-request {
 
       const item = collection.item[0];
       expect(item.event).toBeDefined();
-      const preRequestEvent = item.event?.find((e) => e.listen === 'prerequest');
+      const preRequestEvent = item.event?.find((e: any) => e.listen === 'prerequest');
       expect(preRequestEvent).toBeDefined();
       expect(preRequestEvent?.script?.exec?.join('\n')).toContain('pm.environment.set');
     });
@@ -98,7 +98,7 @@ script:test {
 
       const item = collection.item[0];
       expect(item.event).toBeDefined();
-      const testEvent = item.event?.find((e) => e.listen === 'test');
+      const testEvent = item.event?.find((e: any) => e.listen === 'test');
       expect(testEvent).toBeDefined();
       expect(testEvent?.script?.exec?.join('\n')).toContain('pm.response.code');
     });
@@ -131,7 +131,7 @@ script:pre-request {
       ]);
 
       const item = collection.item[0];
-      const preRequestEvent = item.event?.find((e) => e.listen === 'prerequest');
+      const preRequestEvent = item.event?.find((e: any) => e.listen === 'prerequest');
       expect(preRequestEvent?.script?.exec?.join('\n')).toContain('// WARNING');
     });
 
