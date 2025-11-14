@@ -71,6 +71,7 @@ bruno-to-postman convert ./bruno-requests -o ./collection.json --env
 | `--verbose` | `-v` | Detailed logging | `false` |
 | `--json` | `-j` | JSON output format | `false` |
 | `--force` | `-f` | Overwrite existing files | `false` |
+| `--experimental-ast` | | Use AST-based script conversion (experimental) | `false` |
 
 ## Examples
 
@@ -98,6 +99,87 @@ See the [Quickstart Guide](./specs/001-bruno-to-postman/quickstart.md) for detai
 - GraphQL
 - WebSocket
 - gRPC
+
+## Script Conversion
+
+Bruno and Postman use different APIs for accessing request/response data and managing variables. This tool provides two approaches for converting Bruno scripts to Postman:
+
+### Default: Regex-based Conversion (Stable)
+
+The default converter uses regular expressions to transform Bruno script syntax to Postman equivalents.
+
+**Conversions:**
+- `bru.setVar()` → `pm.environment.set()`
+- `bru.getVar()` → `pm.environment.get()`
+- `res.status` → `pm.response.code`
+- `res.body` → `pm.response.json()`
+- `test()` → `pm.test()`
+- `expect()` → `pm.expect()`
+
+**Usage:**
+```bash
+bruno-to-postman convert ./request.bru -o ./collection.json
+```
+
+**Best for:** Simple scripts, production use, maximum stability
+
+### Experimental: AST-based Conversion
+
+The AST (Abstract Syntax Tree) converter uses Babel to parse, transform, and regenerate JavaScript code, providing more accurate conversion for complex scripts.
+
+**Benefits:**
+- ✅ Handles complex JavaScript constructs (loops, closures, async/await)
+- ✅ Preserves code structure and formatting
+- ✅ Maintains comments in original positions
+- ✅ More accurate transformations for nested expressions
+- ✅ Automatic fallback to regex converter on errors
+
+**Usage:**
+```bash
+bruno-to-postman convert ./request.bru -o ./collection.json --experimental-ast
+```
+
+**Best for:**
+- Scripts with for/while loops
+- Arrow functions and closures
+- Template literals with variables
+- Destructuring assignments
+- Async/await patterns
+- Spread operators
+- Class declarations
+
+**Example transformations:**
+
+```javascript
+// Bruno script with complex constructs
+for (let i = 0; i < items.length; i++) {
+  const item = items[i];
+  bru.setVar(`item${i}`, item.id);
+
+  if (item.status === "active") {
+    const result = await processItem(item);
+    bru.setVar("lastResult", result);
+  }
+}
+
+// Correctly converted to Postman with AST
+for (let i = 0; i < items.length; i++) {
+  const item = items[i];
+  pm.environment.set(`item${i}`, item.id);
+
+  if (item.status === "active") {
+    const result = await processItem(item);
+    pm.environment.set("lastResult", result);
+  }
+}
+```
+
+**Limitations:**
+- Experimental feature - may have edge cases
+- Slightly slower than regex converter
+- Falls back to regex on parse errors
+
+**Detection:** The tool automatically detects when AST parsing would be beneficial for a script, but requires the `--experimental-ast` flag to enable it.
 
 ## Development
 

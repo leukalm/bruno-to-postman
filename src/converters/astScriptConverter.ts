@@ -23,9 +23,13 @@
  */
 
 import { parse } from '@babel/parser';
-import traverse, { NodePath } from '@babel/traverse';
-import generate from '@babel/generator';
+import traverseModule, { NodePath } from '@babel/traverse';
+import generateModule from '@babel/generator';
 import * as t from '@babel/types';
+
+// Handle default exports for ESM compatibility
+const traverse = (traverseModule as any).default || traverseModule;
+const generate = (generateModule as any).default || generateModule;
 
 interface ASTConversionResult {
   script: string;
@@ -96,32 +100,53 @@ function convertScriptAST(
 
     // Traverse and transform the AST
     traverse(ast, {
-      // Transform member expressions like bru.setVar, res.status, etc.
-      MemberExpression(path: NodePath<t.MemberExpression>) {
+      // Transform call expressions for method calls like bru.setVar(), test(), expect()
+      CallExpression(path: NodePath<t.CallExpression>) {
         const node = path.node;
 
-        // Handle bru.* API calls
+        // Handle bru.method() calls
         if (
-          t.isIdentifier(node.object) &&
-          node.object.name === 'bru' &&
-          t.isIdentifier(node.property)
+          t.isMemberExpression(node.callee) &&
+          t.isIdentifier(node.callee.object) &&
+          node.callee.object.name === 'bru' &&
+          t.isIdentifier(node.callee.property)
         ) {
-          const bruMethod = `bru.${node.property.name}`;
+          const bruMethod = `bru.${node.callee.property.name}`;
           const postmanMethod = API_MAPPINGS[bruMethod as keyof typeof API_MAPPINGS];
 
           if (postmanMethod) {
-            // Replace bru.method with pm.environment.method
-            const [pmObject, pmProperty] = postmanMethod.split('.');
-            node.object = t.identifier(pmObject);
-            if (pmProperty) {
-              node.property = t.identifier(pmProperty);
+            // Replace bru.method() with pm.environment.method()
+            const parts = postmanMethod.split('.');
+            if (parts.length === 3) {
+              // pm.environment.set
+              node.callee = t.memberExpression(
+                t.memberExpression(t.identifier(parts[0]), t.identifier(parts[1])),
+                t.identifier(parts[2])
+              );
+            } else if (parts.length === 2) {
+              // pm.test
+              node.callee = t.memberExpression(t.identifier(parts[0]), t.identifier(parts[1]));
             }
           } else {
-            // Unknown bru API - mark for manual review
             hasUnmappableCode = true;
             warnings.push(`Unmappable Bruno API: ${bruMethod}`);
           }
         }
+
+        // Handle test() → pm.test()
+        if (t.isIdentifier(node.callee) && node.callee.name === 'test') {
+          node.callee = t.memberExpression(t.identifier('pm'), t.identifier('test'));
+        }
+
+        // Handle expect() → pm.expect()
+        if (t.isIdentifier(node.callee) && node.callee.name === 'expect') {
+          node.callee = t.memberExpression(t.identifier('pm'), t.identifier('expect'));
+        }
+      },
+
+      // Transform member expressions like res.status, res.body
+      MemberExpression(path: NodePath<t.MemberExpression>) {
+        const node = path.node;
 
         // Handle res.* response object in test scripts
         if (
@@ -146,8 +171,11 @@ function convertScriptAST(
               );
               node.property = t.identifier(pmMethod);
 
-              // If parent is not a call expression, wrap it
-              if (!t.isCallExpression(path.parent)) {
+              // Wrap in call expression if not already being called
+              // (i.e., if parent is not a CallExpression OR if we're not the callee)
+              const shouldWrap = !t.isCallExpression(path.parent) ||
+                                 (t.isCallExpression(path.parent) && path.parent.callee !== node);
+              if (shouldWrap) {
                 path.replaceWith(t.callExpression(node, []));
               }
             } else {
@@ -184,27 +212,6 @@ function convertScriptAST(
           node.property = t.identifier('json');
         }
       },
-
-      // Transform call expressions like test(), expect()
-      CallExpression(path: NodePath<t.CallExpression>) {
-        const node = path.node;
-
-        // Handle test() → pm.test()
-        if (t.isIdentifier(node.callee) && node.callee.name === 'test') {
-          node.callee = t.memberExpression(
-            t.identifier('pm'),
-            t.identifier('test')
-          );
-        }
-
-        // Handle expect() → pm.expect()
-        if (t.isIdentifier(node.callee) && node.callee.name === 'expect') {
-          node.callee = t.memberExpression(
-            t.identifier('pm'),
-            t.identifier('expect')
-          );
-        }
-      },
     });
 
     // Generate the transformed code
@@ -232,6 +239,11 @@ function convertScriptAST(
     const errorMessage = error instanceof Error ? error.message : String(error);
     errors.push(`AST conversion failed: ${errorMessage}`);
 
+    // Log detailed error for debugging
+    if (error instanceof Error && error.stack) {
+      console.error('AST conversion error details:', error.stack);
+    }
+
     return {
       script: brunoScript, // Return original script unchanged
       warnings: ['AST conversion failed - falling back to regex converter'],
@@ -250,7 +262,7 @@ export function shouldUseAST(script: string): boolean {
     /\bfor\s*\(/,           // for loops
     /\bwhile\s*\(/,         // while loops
     /=>\s*{/,               // arrow functions with blocks
-    /\bfunction\s*\(/,      // function declarations
+    /\bfunction\s/,         // function declarations
     /\bconst\s+{.*}/,       // destructuring
     /`.*\${.*}.*`/,         // template literals
     /\bclass\s+/,           // class declarations
