@@ -16,7 +16,8 @@
       "Bash(npm run test:coverage:*)",
       "Bash(git push:*)",
       "Bash(cat:*)",
-      "WebFetch(domain:jsonplaceholder.typicode.com)"
+      "WebFetch(domain:jsonplaceholder.typicode.com)",
+      "Bash(bru run:*)"
     ],
     "deny": [],
     "ask": []

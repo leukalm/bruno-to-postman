@@ -286,13 +286,10 @@ function parseBodySection(lines: string[], sectionName: string): BrunoBody {
   const modeMatch = sectionName.match(/body:(\w+)/);
   const mode = modeMatch ? modeMatch[1] : 'none';
 
-  // Join all lines as content
-  const content = lines
-    .filter((line) => {
-      const trimmed = line.trim();
-      return trimmed && trimmed !== '{' && trimmed !== '}';
-    })
-    .join('\n');
+  // Simply join all lines as content
+  // The section delimiter braces are already filtered out by the main parser
+  // (only lines with braceDepth > 0 are included)
+  const content = lines.join('\n');
 
   return {
     mode: mode as BrunoBody['mode'],

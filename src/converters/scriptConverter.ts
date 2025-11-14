@@ -14,6 +14,8 @@
  * - res.body → pm.response.json()
  * - res.headers → pm.response.headers
  * - res.responseTime → pm.response.responseTime
+ * - test() → pm.test() (Bruno test function)
+ * - expect() → pm.expect() (Chai assertions)
  */
 
 interface ScriptConversionResult {
@@ -104,6 +106,12 @@ export function convertTestScript(brunoScript: string): ScriptConversionResult {
       lineConverted = true;
     }
 
+    // res.getBody() → pm.response.json()
+    if (convertedLine.includes('res.getBody()')) {
+      convertedLine = convertedLine.replace(/res\.getBody\(\)/g, 'pm.response.json()');
+      lineConverted = true;
+    }
+
     // res.body → pm.response.json()
     if (convertedLine.includes('res.body')) {
       convertedLine = convertedLine.replace(/res\.body/g, 'pm.response.json()');
@@ -119,6 +127,20 @@ export function convertTestScript(brunoScript: string): ScriptConversionResult {
     // res.responseTime → pm.response.responseTime
     if (convertedLine.includes('res.responseTime')) {
       convertedLine = convertedLine.replace(/res\.responseTime/g, 'pm.response.responseTime');
+      lineConverted = true;
+    }
+
+    // test() → pm.test() (Bruno test function to Postman)
+    // Use word boundary to avoid replacing 'test' in other contexts
+    if (convertedLine.match(/\btest\s*\(/)) {
+      convertedLine = convertedLine.replace(/\btest\s*\(/g, 'pm.test(');
+      lineConverted = true;
+    }
+
+    // expect() → pm.expect() (Bruno/Chai assertions to Postman)
+    // Use word boundary to avoid replacing 'expect' in other contexts
+    if (convertedLine.match(/\bexpect\s*\(/)) {
+      convertedLine = convertedLine.replace(/\bexpect\s*\(/g, 'pm.expect(');
       lineConverted = true;
     }
 
