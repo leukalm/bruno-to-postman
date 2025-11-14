@@ -81,7 +81,7 @@ export function parseBrunoFile(content: string): BrunoRequest {
         state = 'IN_AUTH';
       } else if (sectionName === 'script:pre-request') {
         state = 'IN_PRE_REQUEST_SCRIPT';
-      } else if (sectionName === 'tests') {
+      } else if (sectionName === 'tests' || sectionName === 'script:test') {
         state = 'IN_TESTS';
       } else if (sectionName === 'docs') {
         state = 'IN_DOCS';
