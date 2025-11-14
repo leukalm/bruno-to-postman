@@ -9,7 +9,10 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(npm test:*)",
-      "Bash(git checkout:*)"
+      "Bash(git checkout:*)",
+      "Bash(npm run build:*)",
+      "Bash(chmod:*)",
+      "Bash(node bin/bruno-to-postman.js:*)"
     ],
     "deny": [],
     "ask": []
