@@ -162,48 +162,91 @@ tests/
 - `bruno-to-postman convert <file.bru> -o <output.json>`
 - Basic parser for .bru format
 - Converter for standard requests (GET, POST, PUT, DELETE)
-- Script conversion (best-effort with English warnings)
+- Script conversion (regex best-effort with English warnings)
 - English CLI messages
 - Basic error handling
 
-### Phase 2: Batch Conversion with Hierarchy
+**Status**: ✅ Completed
 
-**Goal**: Convert directory → Postman collection with folders
+### Phase 2: AST Parsing for Robust Script Conversion
+
+**Goal**: Add `--experimental-ast` flag for robust script conversion via AST parsing
+
+**Deliverables**:
+- Add Babel/acorn dependency for JavaScript AST parsing
+- Implement AST-based script converter (parallel to regex converter)
+- `--experimental-ast` flag to opt-in to AST conversion
+- Support for complex scripts (loops, closures, destructuring, template literals)
+- Precise detection of unmappable constructs with context-aware warnings
+- Regex converter remains default for stability
+
+**Why P2**: Script conversion quality is critical for user trust. Adding AST support early (before batch) ensures single-file conversions are robust, even if flag is opt-in.
+
+### Phase 3: Batch Conversion with Hierarchy
+
+**Goal**: Convert directory → Postman collection with folders, with bruno.json support
 
 **Deliverables**:
 - `bruno-to-postman batch <directory> -o <output.json>`
+- Detection and parsing of `bruno.json` for collection metadata (name, version)
 - Hierarchical folder mapping (level 1 = collection name, level 2+ = folders)
+- Priority resolution: CLI `--name` > bruno.json > directory name
 - Error recovery (continue on parse errors, collect all errors)
 - Detailed conversion report (English, human-readable + JSON modes)
+- Support for `--experimental-ast` flag in batch mode
 
-### Phase 3: Environment Support
+**Why P3**: Batch conversion benefits from robust script conversion (P2). Users can now convert entire projects with high-quality script conversion if they use --experimental-ast.
+
+### Phase 4: Environment Support
 
 **Goal**: Convert Bruno environments → Postman environments
 
 **Deliverables**:
 - `--env` flag to include environment conversion
 - Multiple environment file support (dev, staging, prod)
+- Detection of Bruno environment file formats
+
+**Why P4**: Environment export completes the migration story after core conversions (P1), script quality (P2), and batch operations (P3) are stable.
 
 ## Key Implementation Decisions
 
 ### 1. Script Conversion Strategy (Most Complex Challenge)
 
-**Decision**: Best-effort conversion with English warning comments
+**Decision**: Dual approach - regex (default) + AST (opt-in via --experimental-ast)
 
+**Phase 1 (Regex - Default)**:
 - Map common API calls: `bru.setVar()` → `pm.environment.set()`
 - For unmappable constructions: insert `// WARNING: partial conversion - review manually`
 - CLI displays English warning listing files with partial conversions
 - Success metric: 80%+ automatic conversion rate
 
-### 2. Directory Hierarchy Mapping
+**Phase 2 (AST - Experimental)**:
+- Use Babel/acorn to parse scripts as AST
+- Transform AST nodes (bru.* → pm.*, res.* → pm.response.*)
+- Handle complex constructs (loops, closures, template literals)
+- Precise unmappable detection with context
+- Opt-in via `--experimental-ast` flag
+- Fallback to regex if AST parsing fails
+
+### 2. Bruno Collection Metadata Support (Phase 3)
+
+**Decision**: Detect and use bruno.json when present
+
+- Search for `bruno.json` at directory root
+- Parse `name` and `version` fields (ignore others like `type`, `configuration`)
+- Priority: CLI `--name` > bruno.json > directory name
+- If bruno.json invalid: warning + fallback to directory name
+- Enables native Bruno collection conversion
+
+### 3. Directory Hierarchy Mapping (Phase 3)
 
 **Decision**: Unlimited nested folder support
 
-- Level 1 directory = Postman collection name
+- Level 1 directory = Postman collection name (or from bruno.json)
 - Level 2+ directories = nested Postman folders (no limit)
 - Preserves complete organizational structure
 
-### 3. Error Handling in Batch Mode
+### 4. Error Handling in Batch Mode (Phase 3)
 
 **Decision**: Continue on errors + detailed report
 
@@ -212,7 +255,7 @@ tests/
 - Final report shows successes + failures
 - Enables partial migration success
 
-### 4. File Overwrite Behavior
+### 5. File Overwrite Behavior
 
 **Decision**: Interactive confirmation with --force bypass
 
@@ -220,14 +263,14 @@ tests/
 - `--force` flag bypasses prompt for CI/CD
 - Safe by default, automatable when needed
 
-### 5. Output Formats
+### 6. Output Formats
 
 **Decision**: Dual format support
 
 - Default: Human-readable English output with colors/symbols
 - `--json`: Structured JSON for CI/CD integration
 
-### 6. Internationalization
+### 7. Internationalization
 
 **Decision**: English-only for global open source distribution
 
