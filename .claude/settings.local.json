@@ -19,7 +19,18 @@
       "WebFetch(domain:jsonplaceholder.typicode.com)",
       "Bash(bru run:*)",
       "Bash(newman run:*)",
-      "Bash(.specify/scripts/bash/setup-plan.sh:*)"
+      "Bash(.specify/scripts/bash/setup-plan.sh:*)",
+      "WebSearch",
+      "WebFetch(domain:schema.getpostman.com)",
+      "WebFetch(domain:www.npmjs.com)",
+      "WebFetch(domain:schema.postman.com)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:learning.postman.com)",
+      "WebFetch(domain:blog.postman.com)",
+      "WebFetch(domain:gist.github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(ls:*)",
+      "Bash(.specify/scripts/bash/update-agent-context.sh:*)"
     ],
     "deny": [],
     "ask": []

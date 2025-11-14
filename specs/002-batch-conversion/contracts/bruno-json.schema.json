@@ -1,0 +1,24 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Bruno Collection Metadata",
+  "type": "object",
+  "required": ["version", "name", "type"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "enum": ["1"],
+      "description": "Bruno file format version"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Collection display name"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["collection"],
+      "description": "Must be 'collection'"
+    }
+  },
+  "additionalProperties": true
+}
