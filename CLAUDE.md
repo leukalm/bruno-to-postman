@@ -29,3 +29,6 @@ TypeScript 5.3+ / Node.js 18+: Follow standard conventions
 
 <!-- MANUAL ADDITIONS START -->
 <!-- MANUAL ADDITIONS END -->
+
+  - NEVER include Co-Authored-By: Claude noreply@anthropic.com in commit messages
+  - NEVER include "Generated with Claude Code" footers in commit messages

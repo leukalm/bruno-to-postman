@@ -147,6 +147,8 @@ All code changes MUST pass these gates before merge:
 - Branches MUST follow naming convention: `feature/`, `fix/`, `refactor/`
 - No force pushes to main/master branch
 - Rebase before merge to maintain linear history (optional, team preference)
+- **NEVER include Co-Authored-By: Claude <noreply@anthropic.com> in commit messages**
+- **NEVER include "Generated with Claude Code" footers in commit messages**
 
 ### Dependency Management
 
