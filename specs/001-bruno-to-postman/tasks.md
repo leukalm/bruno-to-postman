@@ -44,29 +44,29 @@ Tasks are organized by phase and user story:
 
 ### Type Definitions (TDD: Define schemas first)
 
-- [ ] T011 [P] Create src/types/bruno.types.ts with BrunoRequest, BrunoMeta, BrunoHeader, BrunoQueryParam, BrunoBody, BrunoAuth interfaces and Zod schemas
-- [ ] T012 [P] Create src/types/postman.types.ts with PostmanCollection, PostmanInfo, PostmanItem, PostmanRequest, PostmanUrl, PostmanBody, PostmanAuth, PostmanEvent interfaces and Zod schemas
-- [ ] T013 [P] Create src/types/cli.types.ts with ConvertOptions, BatchConvertOptions, ConversionResult, ConversionError, ConversionWarning interfaces and Zod schemas
-- [ ] T014 [P] Create src/types/index.ts to export all types from bruno.types, postman.types, and cli.types
+- [x] T011 [P] Create src/types/bruno.types.ts with BrunoRequest, BrunoMeta, BrunoHeader, BrunoQueryParam, BrunoBody, BrunoAuth interfaces and Zod schemas
+- [x] T012 [P] Create src/types/postman.types.ts with PostmanCollection, PostmanInfo, PostmanItem, PostmanRequest, PostmanUrl, PostmanBody, PostmanAuth, PostmanEvent interfaces and Zod schemas
+- [x] T013 [P] Create src/types/cli.types.ts with ConvertOptions, BatchConvertOptions, ConversionResult, ConversionError, ConversionWarning interfaces and Zod schemas
+- [x] T014 [P] Create src/types/index.ts to export all types from bruno.types, postman.types, and cli.types
 
 ### Error Messages (English)
 
-- [ ] T015 Write src/utils/errorMessages.ts with English message templates: INVALID_BRU_FILE, FILE_NOT_FOUND, PARSE_ERROR, VALIDATION_ERROR, WRITE_ERROR, PERMISSION_DENIED, UNSUPPORTED_FEATURE
+- [x] T015 Write src/utils/errorMessages.ts with English message templates: INVALID_BRU_FILE, FILE_NOT_FOUND, PARSE_ERROR, VALIDATION_ERROR, WRITE_ERROR, PERMISSION_DENIED, UNSUPPORTED_FEATURE
 
 ### Utilities
 
-- [ ] T016 [P] Write tests/unit/utils/pathUtils.test.ts with test cases for path normalization, extension checking, directory validation
-- [ ] T017 [P] Implement src/utils/pathUtils.ts with functions: normalizePath(path: string), getFileExtension(path: string), isValidDirectory(path: string), ensureDirectoryExists(path: string)
+- [x] T016 [P] Write tests/unit/utils/pathUtils.test.ts with test cases for path normalization, extension checking, directory validation
+- [x] T017 [P] Implement src/utils/pathUtils.ts with functions: normalizePath(path: string), getFileExtension(path: string), isValidDirectory(path: string), ensureDirectoryExists(path: string)
 
 ### Logging Service
 
-- [ ] T018 Write tests/unit/services/logger.test.ts with test cases for info, warn, error, success messages in English, and JSON output mode
-- [ ] T019 Implement src/services/logger.ts with Logger class supporting human-readable English output (with chalk colors) and JSON output mode
+- [x] T018 Write tests/unit/services/logger.test.ts with test cases for info, warn, error, success messages in English, and JSON output mode
+- [x] T019 Implement src/services/logger.ts with Logger class supporting human-readable English output (with chalk colors) and JSON output mode
 
 ### File I/O Service
 
-- [ ] T020 Write tests/contract/fileService.test.ts with test cases for reading .bru files, writing .json files, handling UTF-8 encoding, permission errors
-- [ ] T021 Implement src/services/fileService.ts with functions: readFile(path: string), writeFile(path: string, content: string), fileExists(path: string), using fs/promises
+- [x] T020 Write tests/contract/fileService.test.ts with test cases for reading .bru files, writing .json files, handling UTF-8 encoding, permission errors
+- [x] T021 Implement src/services/fileService.ts with functions: readFile(path: string), writeFile(path: string, content: string), fileExists(path: string), using fs/promises
 
 ---
 
