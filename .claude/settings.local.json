@@ -15,7 +15,8 @@
       "Bash(node bin/bruno-to-postman.js:*)",
       "Bash(npm run test:coverage:*)",
       "Bash(git push:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "WebFetch(domain:jsonplaceholder.typicode.com)"
     ],
     "deny": [],
     "ask": []

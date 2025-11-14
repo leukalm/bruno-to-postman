@@ -1,0 +1,107 @@
+meta {
+  name: Create New Post
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://jsonplaceholder.typicode.com/posts
+}
+
+headers {
+  Content-Type: application/json
+  Accept: application/json
+  User-Agent: Bruno-to-Postman-Test
+}
+
+body:json {
+  {
+    "title": "Test Post from Bruno",
+    "body": "This is a test post created via the Bruno to Postman converter tool.",
+    "userId": 1
+  }
+}
+
+script:pre-request {
+  // Generate unique title with timestamp
+  const timestamp = Date.now();
+  bru.setVar("postTimestamp", timestamp);
+
+  console.log("Creating post at:", new Date(timestamp).toISOString());
+
+  // Set request start time for performance tracking
+  bru.setVar("createPostStartTime", timestamp);
+}
+
+script:test {
+  // Test response status
+  test("Status code is 201 Created", function() {
+    expect(res.status).to.equal(201);
+  });
+
+  // Test response is JSON
+  test("Response is JSON", function() {
+    expect(res.headers["content-type"]).to.contain("application/json");
+  });
+
+  // Test response structure
+  test("Response contains created post", function() {
+    expect(res.body).to.be.an("object");
+    expect(res.body).to.have.property("id");
+    expect(res.body).to.have.property("title");
+    expect(res.body).to.have.property("body");
+    expect(res.body).to.have.property("userId");
+  });
+
+  // Test response values match request
+  test("Response matches request data", function() {
+    expect(res.body.title).to.equal("Test Post from Bruno");
+    expect(res.body.body).to.contain("Bruno to Postman converter");
+    expect(res.body.userId).to.equal(1);
+  });
+
+  // Test ID is assigned
+  test("Server assigned an ID", function() {
+    expect(res.body.id).to.be.a("number");
+    expect(res.body.id).to.be.greaterThan(0);
+  });
+
+  // Save created post ID for cleanup or further tests
+  if (res.body && res.body.id) {
+    bru.setVar("createdPostId", res.body.id);
+    console.log("Created post with ID:", res.body.id);
+  }
+
+  // Performance check
+  const endTime = Date.now();
+  const startTime = bru.getVar("createPostStartTime");
+  const duration = endTime - startTime;
+
+  test("Response time is acceptable", function() {
+    expect(duration).to.be.below(3000);
+  });
+
+  console.log("Post created in", duration, "ms");
+
+  // Log response for debugging
+  console.log("Created post:", JSON.stringify(res.body, null, 2));
+}
+
+docs {
+  This request creates a new post on the JSONPlaceholder API.
+
+  JSONPlaceholder is a free fake REST API for testing and prototyping.
+  URL: https://jsonplaceholder.typicode.com
+
+  Note: The API will simulate the creation but won't actually persist the data.
+  It will return a response with an ID (typically 101) to simulate a successful creation.
+
+  Request body:
+  - title: Post title (required)
+  - body: Post content (required)
+  - userId: ID of the user creating the post (required)
+
+  Response: Created post object with server-assigned ID.
+
+  Expected status: 201 Created
+}
