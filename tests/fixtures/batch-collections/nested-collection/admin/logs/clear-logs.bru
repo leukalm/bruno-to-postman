@@ -1,0 +1,15 @@
+meta {
+  name: Clear Logs
+  type: http
+  seq: 2
+}
+
+delete {
+  url: https://api.example.com/admin/logs
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}

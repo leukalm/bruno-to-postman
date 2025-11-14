@@ -1,0 +1,22 @@
+meta {
+  name: Export Logs
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://api.example.com/admin/logs/export
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{adminToken}}
+}
+
+body:json {
+  {
+    "format": "csv",
+    "dateRange": "last7days"
+  }
+}
