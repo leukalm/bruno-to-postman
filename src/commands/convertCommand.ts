@@ -11,6 +11,7 @@ export interface ConvertOptions {
   output?: string;
   verbose?: boolean;
   json?: boolean;
+  experimentalAst?: boolean;
 }
 
 /**
@@ -61,12 +62,22 @@ export async function convertCommand(inputPath: string, options: ConvertOptions)
     // Build Postman collection
     logger.verbose('Building Postman collection...');
     const collectionName = brunoRequest.meta.name || path.basename(normalizedInput, '.bru');
-    const collection = buildPostmanCollection(collectionName, [
-      {
-        name: brunoRequest.meta.name,
-        request: brunoRequest,
-      },
-    ]);
+    const useAST = options.experimentalAst || false;
+
+    if (useAST) {
+      logger.verbose('Using experimental AST-based script conversion');
+    }
+
+    const collection = buildPostmanCollection(
+      collectionName,
+      [
+        {
+          name: brunoRequest.meta.name,
+          request: brunoRequest,
+        },
+      ],
+      useAST
+    );
     logger.verbose(`Built collection: ${collection.info.name}`);
 
     // Validate Postman collection

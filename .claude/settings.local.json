@@ -17,7 +17,9 @@
       "Bash(git push:*)",
       "Bash(cat:*)",
       "WebFetch(domain:jsonplaceholder.typicode.com)",
-      "Bash(bru run:*)"
+      "Bash(bru run:*)",
+      "Bash(newman run:*)",
+      "Bash(.specify/scripts/bash/setup-plan.sh:*)"
     ],
     "deny": [],
     "ask": []

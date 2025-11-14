@@ -24,6 +24,7 @@ program
   .option('-o, --output <path>', 'Output file path (default: <input>.postman_collection.json)')
   .option('-v, --verbose', 'Enable verbose logging', false)
   .option('--json', 'Output logs in JSON format', false)
+  .option('--experimental-ast', 'Use AST parsing for robust script conversion (experimental)', false)
   .action(async (input: string, options: any) => {
     await convertCommand(input, options);
   });
