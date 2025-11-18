@@ -209,7 +209,9 @@ Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for g
 
 ## License
 
-MIT
+MIT License - see the [LICENSE](LICENSE) file for details.
+
+Copyright (c) 2025 bruno-to-postman contributors
 
 ## Support
 
