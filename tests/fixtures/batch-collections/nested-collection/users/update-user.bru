@@ -1,0 +1,17 @@
+meta {
+  name: Update User
+  type: http
+  seq: 4
+}
+
+patch {
+  url: https://api.example.com/users/{{userId}}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "status": "active"
+  }
+}

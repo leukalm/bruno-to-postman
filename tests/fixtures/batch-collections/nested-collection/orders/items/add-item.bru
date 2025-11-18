@@ -1,0 +1,18 @@
+meta {
+  name: Add Order Item
+  type: http
+  seq: 1
+}
+
+post {
+  url: https://api.example.com/orders/{{orderId}}/items
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "productId": "{{productId}}",
+    "quantity": 1
+  }
+}

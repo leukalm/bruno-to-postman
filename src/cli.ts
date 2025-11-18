@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from 'commander';
-import { convertCommand } from './commands/convertCommand.js';
+import { convertCommand, ConvertOptions } from './commands/convertCommand.js';
 import { readFileSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -20,12 +20,13 @@ program
 
 program
   .command('convert <input>')
-  .description('Convert a Bruno .bru file to a Postman collection')
+  .description('Convert a Bruno .bru file or directory to a Postman collection')
   .option('-o, --output <path>', 'Output file path (default: <input>.postman_collection.json)')
+  .option('-n, --name <name>', 'Custom collection name (overrides bruno.json)')
   .option('-v, --verbose', 'Enable verbose logging', false)
   .option('--json', 'Output logs in JSON format', false)
   .option('--experimental-ast', 'Use AST parsing for robust script conversion (experimental)', false)
-  .action(async (input: string, options: any) => {
+  .action(async (input: string, options: ConvertOptions) => {
     await convertCommand(input, options);
   });
 

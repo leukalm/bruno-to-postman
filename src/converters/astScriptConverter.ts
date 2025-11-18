@@ -28,8 +28,8 @@ import generateModule from '@babel/generator';
 import * as t from '@babel/types';
 
 // Handle default exports for ESM compatibility
-const traverse = (traverseModule as any).default || traverseModule;
-const generate = (generateModule as any).default || generateModule;
+const traverse = (traverseModule as { default?: typeof traverseModule } & typeof traverseModule).default || traverseModule;
+const generate = (generateModule as { default?: typeof generateModule } & typeof generateModule).default || generateModule;
 
 interface ASTConversionResult {
   script: string;

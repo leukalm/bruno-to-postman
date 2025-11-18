@@ -1,0 +1,17 @@
+meta {
+  name: Malformed JSON
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://api.example.com/data
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "invalid": json syntax
+  }
+}
