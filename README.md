@@ -29,7 +29,7 @@ npm install --save-dev bruno-to-postman
 ### From Source
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/leukalm/bruno-to-postman.git
 cd bruno-to-postman
 npm install
 npm run build
@@ -215,4 +215,4 @@ Copyright (c) 2025 bruno-to-postman contributors
 
 ## Support
 
-For issues and feature requests, please visit the [issue tracker](<repository-url>/issues).
+For issues and feature requests, please visit the [issue tracker](https://github.com/leukalm/bruno-to-postman/issues).

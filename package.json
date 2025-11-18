@@ -33,16 +33,16 @@
     "http",
     "collection"
   ],
-  "author": "",
+  "author": "leukalm <leukalm@gmail.com>",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": ""
+    "url": "https://github.com/leukalm/bruno-to-postman.git"
   },
   "bugs": {
-    "url": ""
+    "url": "https://github.com/leukalm/bruno-to-postman/issues"
   },
-  "homepage": "",
+  "homepage": "https://github.com/leukalm/bruno-to-postman#readme",
   "dependencies": {
     "@babel/generator": "^7.28.5",
     "@babel/parser": "^7.28.5",
