@@ -30,7 +30,9 @@
       "WebFetch(domain:gist.github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "Bash(ls:*)",
-      "Bash(.specify/scripts/bash/update-agent-context.sh:*)"
+      "Bash(.specify/scripts/bash/update-agent-context.sh:*)",
+      "Bash(npm run lint:*)",
+      "Bash(npm audit:*)"
     ],
     "deny": [],
     "ask": []

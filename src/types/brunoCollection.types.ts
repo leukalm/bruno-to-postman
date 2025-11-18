@@ -16,7 +16,7 @@ export interface FileTreeNode {
   name: string;
   path: string;
   type: 'file' | 'directory';
-  brunoRequest?: any; // Will contain parsed Bruno request for files
+  brunoRequest?: import('./bruno.types.js').BrunoRequest;
   children: FileTreeNode[];
 }
 
