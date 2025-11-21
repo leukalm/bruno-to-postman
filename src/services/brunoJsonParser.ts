@@ -1,6 +1,5 @@
 import { join } from 'path';
 import { readFile, fileExists } from './fileService.js';
-import { BrunoCollectionMetadata } from '../types/brunoCollection.types.js';
 import { basename } from 'path';
 
 /**
@@ -9,6 +8,12 @@ import { basename } from 'path';
  * @param cliName - Optional name provided via CLI
  * @returns Collection name and warnings if any
  */
+interface RawBrunoCollectionMetadata {
+  version?: string;
+  name?: string;
+  type?: string;
+}
+
 export async function parseBrunoJson(
   directoryPath: string,
   cliName?: string
@@ -27,7 +32,7 @@ export async function parseBrunoJson(
   if (exists) {
     try {
       const content = await readFile(brunoJsonPath);
-      const metadata = JSON.parse(content) as BrunoCollectionMetadata;
+      const metadata = JSON.parse(content) as RawBrunoCollectionMetadata;
 
       // Validate schema
       if (!metadata.version || metadata.version !== '1') {

@@ -126,6 +126,7 @@ export type BrunoCollectionItem = {
 };
 
 // Use any type for the schema to avoid complex recursive type issues
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const BrunoCollectionItemSchema: z.ZodSchema<any> = z.lazy(() =>
   z.object({
     type: z.enum(['request', 'folder']),

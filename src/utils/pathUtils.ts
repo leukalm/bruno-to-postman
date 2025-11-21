@@ -44,7 +44,7 @@ export async function isValidDirectory(path: string): Promise<boolean> {
   try {
     const stats = await stat(path);
     return stats.isDirectory();
-  } catch (error) {
+  } catch {
     // Path doesn't exist or is inaccessible
     return false;
   }
