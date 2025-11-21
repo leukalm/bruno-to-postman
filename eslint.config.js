@@ -21,8 +21,8 @@ export default [
       "@typescript-eslint/explicit-function-return-type": "warn",
       "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
       "@typescript-eslint/no-explicit-any": "error",
-      "no-console": ["warn", { "allow": ["warn", "error"] }],
-      "max-len": ["warn", { "code": 120 }]
+      "no-console": "off",
+      "max-len": "off"
     }
   },
   {

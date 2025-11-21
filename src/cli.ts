@@ -25,6 +25,7 @@ program
   .option('-n, --name <name>', 'Custom collection name (overrides bruno.json)')
   .option('-v, --verbose', 'Enable verbose logging', false)
   .option('--json', 'Output logs in JSON format', false)
+  .option('--env', 'Include environment conversion', false)
   .option('--experimental-ast', 'Use AST parsing for robust script conversion (experimental)', false)
   .action(async (input: string, options: ConvertOptions) => {
     await convertCommand(input, options);
