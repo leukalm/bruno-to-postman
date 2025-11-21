@@ -1,4 +1,5 @@
 import { readFile, writeFile, fileExists } from '../services/fileService.js';
+import { PostmanApiService } from '../services/postmanApiService.js';
 import { Logger } from '../services/logger.js';
 import { parseBrunoFile } from '../parsers/brunoParser.js';
 import { validateBrunoRequest } from '../validators/brunoValidator.js';
@@ -9,6 +10,7 @@ import { scanDirectory } from '../services/directoryScanner.js';
 import { parseBrunoJson } from '../services/brunoJsonParser.js';
 import { buildFileTree } from '../utils/fileTreeBuilder.js';
 import { FileTreeNode, BatchConversionReport, ConversionError } from '../types/brunoCollection.types.js';
+import { PostmanCollection } from '../types/postman.types.js';
 import { parseBrunoEnvironmentFile } from '../parsers/brunoEnvironmentParser.js';
 import { convertBrunoEnvironmentToPostman } from '../converters/environmentConverter.js';
 import { stat } from 'fs/promises';
@@ -21,6 +23,9 @@ export interface ConvertOptions {
   experimentalAst?: boolean;
   name?: string; // Custom collection name (CLI override)
   env?: boolean;
+  upload?: boolean;
+  postmanApiKey?: string;
+  collectionId?: string;
 }
 
 /**
@@ -129,6 +134,9 @@ async function convertSingleFile(
   const validatedCollection = validatePostmanCollection(collection);
   logger.verbose('Postman collection is valid');
 
+  // Upload to Postman Cloud if requested
+  await handleUpload(validatedCollection, options, logger);
+
   // Determine output path
   let outputPath: string;
   if (options.output) {
@@ -225,6 +233,9 @@ async function convertDirectory(
   logger.verbose('Validating Postman collection...');
   const validatedCollection = validatePostmanCollection(collection);
   logger.verbose('Postman collection is valid');
+
+  // Upload to Postman Cloud if requested
+  await handleUpload(validatedCollection, options, logger);
 
   // Determine output path
   let outputPath: string;
@@ -388,5 +399,42 @@ function displayTextReport(report: BatchConversionReport, logger: Logger): void 
 
   if (report.successCount > 0) {
     logger.success(`\nConversion completed: ${report.outputPath}`);
+  }
+}
+
+/**
+ * Handle upload to Postman Cloud
+ * @param collection - Postman collection
+ * @param options - Conversion options
+ * @param logger - Logger instance
+ */
+async function handleUpload(
+  collection: PostmanCollection,
+  options: ConvertOptions,
+  logger: Logger
+): Promise<void> {
+  if (options.upload) {
+    const apiKey = options.postmanApiKey || process.env.POSTMAN_API_KEY;
+    const collectionId = options.collectionId;
+
+    if (!apiKey) {
+      logger.error('Postman API Key is required for upload. Use --postman-api-key or set POSTMAN_API_KEY env var.');
+      process.exit(1);
+    }
+
+    if (!collectionId) {
+      logger.error('Postman Collection ID is required for upload. Use --collection-id.');
+      process.exit(1);
+    }
+
+    logger.info(`Uploading collection to Postman Cloud (ID: ${collectionId})...`);
+    const apiService = new PostmanApiService();
+    try {
+      await apiService.updateCollection(collectionId, collection, apiKey);
+      logger.success('Collection uploaded successfully!');
+    } catch (error) {
+      logger.error(`Failed to upload collection: ${(error as Error).message}`);
+      process.exit(1);
+    }
   }
 }

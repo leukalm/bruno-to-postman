@@ -1,0 +1,32 @@
+meta {
+  name: Get All Posts
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://jsonplaceholder.typicode.com/posts
+  body: none
+  auth: none
+}
+
+params:query {
+  userId: 1
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.status).to.equal(200);
+  });
+  
+  test("Posts belong to user 1", function() {
+    const posts = res.getBody();
+    posts.forEach(post => {
+      expect(post.userId).to.equal(1);
+    });
+  });
+  
+  test("Content-Type header is correct", function() {
+    expect(res.headers['content-type']).to.include('application/json');
+  });
+}

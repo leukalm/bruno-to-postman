@@ -1,0 +1,40 @@
+meta {
+  name: Create User
+  type: http
+  seq: 2
+}
+
+post {
+  url: https://jsonplaceholder.typicode.com/users
+  body: json
+  auth: none
+}
+
+headers {
+  Content-Type: application/json
+}
+
+body:json {
+  {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "username": "johndoe"
+  }
+}
+
+tests {
+  test("Status code is 201", function() {
+    expect(res.status).to.equal(201);
+  });
+  
+  test("Response contains created user", function() {
+    const user = res.getBody();
+    expect(user).to.have.property('id');
+    expect(user.name).to.equal('John Doe');
+    expect(user.email).to.equal('john@example.com');
+  });
+  
+  test("Response time is acceptable", function() {
+    expect(res.responseTime).to.be.below(2000);
+  });
+}
