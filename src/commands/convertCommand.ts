@@ -9,6 +9,8 @@ import { scanDirectory } from '../services/directoryScanner.js';
 import { parseBrunoJson } from '../services/brunoJsonParser.js';
 import { buildFileTree } from '../utils/fileTreeBuilder.js';
 import { FileTreeNode, BatchConversionReport, ConversionError } from '../types/brunoCollection.types.js';
+import { parseBrunoEnvironmentFile } from '../parsers/brunoEnvironmentParser.js';
+import { convertBrunoEnvironmentToPostman } from '../converters/environmentConverter.js';
 import { stat } from 'fs/promises';
 import path from 'path';
 
@@ -18,6 +20,7 @@ export interface ConvertOptions {
   json?: boolean;
   experimentalAst?: boolean;
   name?: string; // Custom collection name (CLI override)
+  env?: boolean;
 }
 
 /**
@@ -173,9 +176,17 @@ async function convertDirectory(
   const files = await scanDirectory(directoryPath);
   logger.verbose(`Found ${files.length} .bru files`);
 
+  // Filter out environment files (usually in environments/ folder)
+  // We don't want to try to convert them as requests
+  const requestFiles = files.filter(f => !f.includes('/environments/') && !f.includes('\\environments\\'));
+  
+  if (files.length > requestFiles.length) {
+    logger.verbose(`Excluded ${files.length - requestFiles.length} environment files from request conversion`);
+  }
+
   // AC7: Handle empty directory
-  if (files.length === 0) {
-    logger.error(`No .bru files found in ${directoryPath}`);
+  if (requestFiles.length === 0) {
+    logger.error(`No .bru request files found in ${directoryPath}`);
     process.exit(1);
   }
 
@@ -191,7 +202,7 @@ async function convertDirectory(
 
   // Build file tree (AC2, AC3)
   logger.verbose('Building file tree...');
-  const fileTree = buildFileTree(files, directoryPath);
+  const fileTree = buildFileTree(requestFiles, directoryPath);
   logger.verbose(`Built file tree with ${fileTree.children.length} top-level items`);
 
   // Convert files and collect errors (AC8)
@@ -203,7 +214,7 @@ async function convertDirectory(
   await processFileTree(fileTree, errors, logger, useAST);
 
   // Count successes
-  successCount = files.length - errors.length;
+  successCount = requestFiles.length - errors.length;
 
   // Build Postman collection
   logger.verbose('Building Postman collection from file tree...');
@@ -238,17 +249,61 @@ async function convertDirectory(
   await writeFile(outputPath, jsonContent);
   logger.verbose(`Wrote ${jsonContent.length} characters`);
 
+  // Handle environment conversion if requested
+  if (options.env) {
+    logger.verbose('Scanning for environment files...');
+    // Look for environments folder or .bru files that look like environments
+    // For now, we'll scan the whole directory for .bru files again, but check if they are environments
+    // Ideally, we should have identified them during the initial scan, but scanDirectory returns file paths.
+    // We can re-use the files list if we want, but we need to parse them to know if they are environments.
+    // However, typical Bruno structure has an 'environments' folder.
+    
+    const envDir = path.join(directoryPath, 'environments');
+    if (await fileExists(envDir)) {
+      const envFiles = await scanDirectory(envDir);
+      logger.verbose(`Found ${envFiles.length} potential environment files in environments/`);
+      
+      for (const envFile of envFiles) {
+        try {
+          if (getFileExtension(envFile) !== '.bru') continue;
+          
+          const content = await readFile(envFile);
+          // We try to parse as environment. If it fails or doesn't look like one, we skip.
+          // Our parser is lenient, but let's check if it has vars.
+          if (!content.includes('vars {')) {
+             continue;
+          }
+          
+          const brunoEnv = parseBrunoEnvironmentFile(content);
+          // Use filename as name if not parsed (though parser currently doesn't extract name from file content usually)
+          brunoEnv.name = path.basename(envFile, '.bru');
+          
+          const postmanEnv = convertBrunoEnvironmentToPostman(brunoEnv);
+          
+          const envOutputPath = path.join(directoryPath, `${brunoEnv.name}.postman_environment.json`);
+          await writeFile(envOutputPath, JSON.stringify(postmanEnv, null, 2));
+          logger.success(`Converted environment: ${envOutputPath}`);
+          
+        } catch (err) {
+          logger.warn(`Failed to convert environment ${envFile}: ${err instanceof Error ? err.message : String(err)}`);
+        }
+      }
+    } else {
+        logger.verbose('No environments folder found, skipping environment conversion');
+    }
+  }
+
   // Generate report (AC8)
   const duration = Date.now() - startTime;
   const report: BatchConversionReport = {
-    totalFiles: files.length,
+    totalFiles: requestFiles.length,
     successCount,
     failureCount: errors.length,
     duration,
     errors,
     warnings,
     outputPath,
-    successRate: files.length > 0 ? (successCount / files.length) * 100 : 0,
+    successRate: requestFiles.length > 0 ? (successCount / requestFiles.length) * 100 : 0,
   };
 
   // Display report

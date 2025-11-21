@@ -48,10 +48,12 @@
     "@babel/parser": "^7.28.5",
     "@babel/traverse": "^7.28.5",
     "@babel/types": "^7.28.5",
+    "@types/uuid": "^10.0.0",
     "chalk": "^5.6.2",
     "commander": "^11.1.0",
     "glob": "12.0.0",
     "ora": "^7.0.1",
+    "uuid": "^13.0.0",
     "zod": "^3.25.76"
   },
   "devDependencies": {
