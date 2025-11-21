@@ -44,7 +44,7 @@ export function convertPreRequestScript(brunoScript: string): ScriptConversionRe
   const warnings: string[] = [];
   let hasUnmappableCode = false;
 
-  for (let line of lines) {
+  for (const line of lines) {
     let convertedLine = line;
     let lineConverted = false;
 
@@ -87,7 +87,7 @@ export function convertTestScript(brunoScript: string): ScriptConversionResult {
   const warnings: string[] = [];
   let hasUnmappableCode = false;
 
-  for (let line of lines) {
+  for (const line of lines) {
     let convertedLine = line;
     let lineConverted = false;
 

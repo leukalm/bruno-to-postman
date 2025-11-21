@@ -105,7 +105,7 @@ export function parseUrl(rawUrl: string): ParsedUrl {
     if (url.hash) {
       result.hash = restoreVariables(url.hash.slice(1));
     }
-  } catch (error) {
+  } catch {
     // If URL parsing fails, try manual parsing
     // This handles cases like relative URLs or URLs without protocol
 

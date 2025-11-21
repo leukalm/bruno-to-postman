@@ -244,7 +244,7 @@ function convertScriptAST(
           );
 
           // Replace with pm.response.headers.get(headerName)
-          path.replaceWith(t.callExpression(getMethod, [node.property as t.Expression]));
+          path.replaceWith(t.callExpression(getMethod, [node.property]));
         }
 
         // Handle res.getBody() method call

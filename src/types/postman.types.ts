@@ -169,6 +169,7 @@ export type PostmanItem = {
 };
 
 // Use any type for the schema to avoid complex recursive type issues
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const PostmanItemSchema: z.ZodSchema<any> = z.lazy(() =>
   z.object({
     name: z.string(),
