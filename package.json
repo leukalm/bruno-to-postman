@@ -1,6 +1,6 @@
 {
   "name": "bruno-to-postman",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "CLI tool to convert Bruno REST request files (.bru) to Postman Collection format (v2.1)",
   "type": "module",
   "main": "./dist/index.js",
