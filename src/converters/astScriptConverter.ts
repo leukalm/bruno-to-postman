@@ -219,32 +219,60 @@ function convertScriptAST(
         }
 
         // Handle res.headers["key"] → pm.response.headers.get("key")
+        // Also handle pm.response.headers["key"] → pm.response.headers.get("key") (after initial conversion)
         if (
           scriptType === 'test' &&
-          node.computed && // Bracket notation: res.headers["key"]
+          node.computed && // Bracket notation
           t.isMemberExpression(node.object) &&
-          t.isIdentifier(node.object.object) &&
-          node.object.object.name === 'res' &&
-          t.isIdentifier(node.object.property) &&
-          node.object.property.name === 'headers' &&
           !t.isPrivateName(node.property) // Ensure it's not a private name
         ) {
-          // Transform res.headers["key"] to pm.response.headers.get("key")
-          const pmResponseHeaders = t.memberExpression(
-            t.memberExpression(
-              t.identifier('pm'),
-              t.identifier('response')
-            ),
-            t.identifier('headers')
-          );
+          // Check for res.headers["key"]
+          const isResHeaders =
+            t.isIdentifier(node.object.object) &&
+            node.object.object.name === 'res' &&
+            t.isIdentifier(node.object.property) &&
+            node.object.property.name === 'headers';
 
-          const getMethod = t.memberExpression(
-            pmResponseHeaders,
-            t.identifier('get')
-          );
+          // Check for pm.response.headers["key"]
+          // Structure: pm.response.headers['key'] is:
+          // MemberExpression(MemberExpression(MemberExpression(pm, response), headers), 'key')
+          let isPmResponseHeaders = false;
+          if (t.isMemberExpression(node.object.object)) {
+            const pmResponseNode = node.object.object;
+            // Check if this is pm.response
+            if (
+              t.isMemberExpression(pmResponseNode.object) &&
+              t.isIdentifier(pmResponseNode.object.object) &&
+              pmResponseNode.object.object.name === 'pm' &&
+              t.isIdentifier(pmResponseNode.object.property) &&
+              pmResponseNode.object.property.name === 'response' &&
+              t.isIdentifier(pmResponseNode.property) &&
+              pmResponseNode.property.name === 'headers' &&
+              t.isIdentifier(node.object.property) &&
+              node.object.property.name === 'headers'
+            ) {
+              isPmResponseHeaders = true;
+            }
+          }
 
-          // Replace with pm.response.headers.get(headerName)
-          path.replaceWith(t.callExpression(getMethod, [node.property]));
+          if (isResHeaders || isPmResponseHeaders) {
+            // Transform to pm.response.headers.get("key")
+            const pmResponseHeaders = t.memberExpression(
+              t.memberExpression(
+                t.identifier('pm'),
+                t.identifier('response')
+              ),
+              t.identifier('headers')
+            );
+
+            const getMethod = t.memberExpression(
+              pmResponseHeaders,
+              t.identifier('get')
+            );
+
+            // Replace with pm.response.headers.get(headerName)
+            path.replaceWith(t.callExpression(getMethod, [node.property]));
+          }
         }
 
         // Handle res.getBody() method call

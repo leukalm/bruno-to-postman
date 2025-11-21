@@ -11,6 +11,7 @@ A CLI tool to convert Bruno REST request files (.bru) to Postman Collection form
 - ✅ Convert authentication settings (Basic, Bearer, API Key)
 - ✅ Best-effort script conversion (pre-request and test scripts)
 - ✅ Environment file conversion support
+- ✅ **Upload collections directly to Postman Cloud**
 
 ## Installation
 
@@ -61,6 +62,19 @@ bruno-to-postman convert ./bruno-requests -o ./my-collection.json -n "My API Col
 bruno-to-postman convert ./bruno-requests -o ./collection.json --env
 ```
 
+### Upload to Postman Cloud
+
+```bash
+# Upload converted collection directly to Postman Cloud
+bruno-to-postman convert ./bruno-requests --upload --postman-api-key YOUR_API_KEY --collection-id YOUR_COLLECTION_ID
+
+# Or use environment variable for API key
+export POSTMAN_API_KEY=YOUR_API_KEY
+bruno-to-postman convert ./bruno-requests --upload --collection-id YOUR_COLLECTION_ID
+```
+
+**Note:** The `--upload` option will **overwrite** the existing collection in Postman Cloud. Make sure to use the correct Collection ID.
+
 ## CLI Options
 
 | Option | Alias | Description | Default |
@@ -68,6 +82,9 @@ bruno-to-postman convert ./bruno-requests -o ./collection.json --env
 | `--output` | `-o` | Output file path | `./collection.postman.json` |
 | `--name` | `-n` | Collection name | Source directory name |
 | `--env` | `-e` | Include environment conversion | `false` |
+| `--upload` | | Upload to Postman Cloud (overwrites existing collection) | `false` |
+| `--postman-api-key` | | Postman API Key (or use `POSTMAN_API_KEY` env var) | - |
+| `--collection-id` | | Postman Collection ID (required for upload) | - |
 | `--verbose` | `-v` | Detailed logging | `false` |
 | `--json` | `-j` | JSON output format | `false` |
 | `--force` | `-f` | Overwrite existing files | `false` |

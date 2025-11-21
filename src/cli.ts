@@ -26,6 +26,9 @@ program
   .option('-v, --verbose', 'Enable verbose logging', false)
   .option('--json', 'Output logs in JSON format', false)
   .option('--env', 'Include environment conversion', false)
+  .option('--upload', 'Upload to Postman Cloud (overwrites existing collection)', false)
+  .option('--postman-api-key <key>', 'Postman API Key (defaults to POSTMAN_API_KEY env var)')
+  .option('--collection-id <id>', 'Postman Collection ID (required for upload)')
   .option('--experimental-ast', 'Use AST parsing for robust script conversion (experimental)', false)
   .action(async (input: string, options: ConvertOptions) => {
     await convertCommand(input, options);

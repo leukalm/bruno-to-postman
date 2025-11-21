@@ -1,0 +1,162 @@
+{
+  "info": {
+    "name": "Complex API Test",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "posts",
+      "item": [
+        {
+          "name": "get-posts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://jsonplaceholder.typicode.com/posts",
+              "protocol": "https",
+              "host": [
+                "jsonplaceholder.typicode.com"
+              ],
+              "path": [
+                "posts"
+              ],
+              "query": [
+                {
+                  "key": "userId",
+                  "value": "1",
+                  "disabled": false
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});",
+                  "pm.test(\"Posts belong to user 1\", function () {",
+                  "  const posts = pm.response.json();",
+                  "  posts.forEach(post => {",
+                  "    pm.expect(post.userId).to.equal(1);",
+                  "  });",
+                  "});",
+                  "pm.test(\"Content-Type header is correct\", function () {",
+                  "  pm.expect(pm.response.headers.get('content-type')).to.include('application/json');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "users",
+      "item": [
+        {
+          "name": "create-user",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text",
+                "disabled": false
+              }
+            ],
+            "url": {
+              "raw": "https://jsonplaceholder.typicode.com/users",
+              "protocol": "https",
+              "host": [
+                "jsonplaceholder.typicode.com"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": []
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "  {\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"username\": \"johndoe\"\n  }",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 201\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(201);",
+                  "});",
+                  "pm.test(\"Response contains created user\", function () {",
+                  "  const user = pm.response.json();",
+                  "  pm.expect(user).to.have.property('id');",
+                  "  pm.expect(user.name).to.equal('John Doe');",
+                  "  pm.expect(user.email).to.equal('john@example.com');",
+                  "});",
+                  "pm.test(\"Response time is acceptable\", function () {",
+                  "  pm.expect(pm.response.responseTime).to.be.below(2000);",
+                  "});"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "get-users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "https://jsonplaceholder.typicode.com/users",
+              "protocol": "https",
+              "host": [
+                "jsonplaceholder.typicode.com"
+              ],
+              "path": [
+                "users"
+              ],
+              "query": []
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"Status code is 200\", function () {",
+                  "  pm.expect(pm.response.code).to.equal(200);",
+                  "});",
+                  "pm.test(\"Response is an array\", function () {",
+                  "  const data = pm.response.json();",
+                  "  pm.expect(Array.isArray(data)).to.be.true;",
+                  "});",
+                  "pm.test(\"Users have required fields\", function () {",
+                  "  const users = pm.response.json();",
+                  "  pm.expect(users.length).to.be.greaterThan(0);",
+                  "  pm.expect(users[0]).to.have.property('id');",
+                  "  pm.expect(users[0]).to.have.property('name');",
+                  "  pm.expect(users[0]).to.have.property('email');",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
